@@ -3,51 +3,50 @@
 #include "esphome/core/log.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 #include <SPI.h>
-#include <RadioLib.h>
+#include <LoRa.h>
 
 namespace esphome {
 namespace lora_radiolib {
 
-// คลาสนี้เป็น TextSensor แล้ว!
 class LoRaRadioLib : public text_sensor::TextSensor, public Component {
  public:
   void set_pins(int cs, int dio0, int rst) {
-    cs_ = cs; dio0_ = dio0; rst_ = rst;
+    cs_ = cs; rst_ = rst; dio0_ = dio0;
   }
-  void set_frequency(float freq) { freq_ = freq; }
 
   void setup() override {
-    ESP_LOGD("lora_radiolib", "Starting LoRa RadioLib Component...");
-    hal_ = new ArduinoHal(SPI);
-    module_ = new Module(hal_, cs_, dio0_, rst_);
-    radio_ = new SX1278(module_);
+    ESP_LOGD("lora", "Starting LoRa with sandeepmistry/LoRa...");
+    
+    // ตั้งค่าขาสัญญาณ
+    LoRa.setPins(cs_, rst_, dio0_);
 
-    int state = radio_->begin(freq_);
-    if (state == RADIOLIB_ERR_NONE) {
-      ESP_LOGD("lora_radiolib", "LoRa Initialize Success!");
-    } else {
-      ESP_LOGE("lora_radiolib", "LoRa Failed, code: %d", state);
-      mark_failed(); 
+    // เริ่มต้นที่ความถี่ 433MHz
+    if (!LoRa.begin(433E6)) {
+      ESP_LOGE("lora", "Starting LoRa failed!");
+      mark_failed();
+      return;
     }
+    ESP_LOGD("lora", "LoRa Initialize Success!");
   }
 
   void loop() override {
-    String str;
-    int state = radio_->receive(str);
-    if (state == RADIOLIB_ERR_NONE) {
-      ESP_LOGI("lora_radiolib", "Received packet: %s", str.c_str());
+    // ตรวจสอบขนาดของ Packet ที่รับได้
+    int packetSize = LoRa.parsePacket();
+    if (packetSize) {
+      std::string data = "";
+      while (LoRa.available()) {
+        data += (char)LoRa.read();
+      }
       
-      // 🚀 คำสั่งนี้แหละครับที่จะโยนข้อความขึ้นหน้า Home Assistant!
-      this->publish_state(str.c_str());
+      ESP_LOGI("lora", "Received: %s (RSSI: %d)", data.c_str(), LoRa.packetRssi());
+      
+      // ส่งค่าขึ้น Home Assistant
+      this->publish_state(data);
     }
   }
 
  protected:
-  int cs_, dio0_, rst_;
-  float freq_;
-  ArduinoHal* hal_;
-  Module* module_;
-  SX1278* radio_;
+  int cs_, rst_, dio0_;
 };
 
 }  // namespace lora_radiolib
