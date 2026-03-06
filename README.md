@@ -9,15 +9,7 @@ A reliable and up-to-date ESPHome external component for LoRa SX1278/SX1276 modu
 * **Plug & Play:** No need to manually download or manage C++ files. Just use `external_components` in your YAML.
 * **Hardware Support:** Tested working perfectly with ESP32 boards (including modern variants like ESP32-C3).
 * 
-LoRa SX1278 Pin,ESP32-C3 Pin,Description
-VCC,3.3V,Power Supply (ห้ามต่อ 5V เด็ดขาด)
-GND,GND,Ground
-SCK,GPIO 4,SPI Clock
-MISO,GPIO 5,SPI MISO
-MOSI,GPIO 6,SPI MOSI
-NSS / CS,GPIO 7,Chip Select
-DIO0,GPIO 3,Interrupt Pin
-RST,GPIO 10,Reset Pin
+
 ## 🚀 Installation & Usage
 
 Add the following configuration to your `esphome.yaml` file. Make sure to adjust the pins and frequency according to your specific hardware setup.
