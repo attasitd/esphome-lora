@@ -3,23 +3,27 @@ import esphome.config_validation as cv
 from esphome.components import text_sensor
 from esphome.const import CONF_ID, CONF_FREQUENCY
 
-# เพิ่มชื่อเรียกค่าตัวแปรใหม่
-CONF_TX_POWER = "tx_power"
-CONF_SPREADING_FACTOR = "spreading_factor"
-CONF_CODING_RATE = "coding_rate"
-CONF_CS_PIN = 'cs_pin'
-CONF_DIO0_PIN = 'dio0_pin'
-CONF_RST_PIN = 'rst_pin'
+# 🌟 จุดสำคัญ: ย้าย text_sensor มาไว้ใน DEPENDENCIES เพื่อบังคับให้ compiler หาไฟล์ .h เจอแน่นอน
+DEPENDENCIES = ['spi', 'text_sensor']
+AUTO_LOAD = ['text_sensor']
 
 lora_ns = cg.esphome_ns.namespace('lora_simple')
 LoRaComponent = lora_ns.class_('LoRaComponent', text_sensor.TextSensor, cg.Component)
+
+# กำหนดชื่อตัวแปรสำหรับพารามิเตอร์ใหม่
+CONF_CS_PIN = 'cs_pin'
+CONF_DIO0_PIN = 'dio0_pin'
+CONF_RST_PIN = 'rst_pin'
+CONF_TX_POWER = "tx_power"
+CONF_SPREADING_FACTOR = "spreading_factor"
+CONF_CODING_RATE = "coding_rate"
 
 CONFIG_SCHEMA = text_sensor.text_sensor_schema(LoRaComponent).extend({
     cv.Required(CONF_CS_PIN): cv.int_,
     cv.Required(CONF_DIO0_PIN): cv.int_,
     cv.Required(CONF_RST_PIN): cv.int_,
     cv.Optional(CONF_FREQUENCY, default=433.0): cv.float_,
-    # เพิ่มส่วนตั้งค่าใหม่พร้อมค่า Default
+    # --- ส่วนที่เพิ่มใหม่สำหรับจูนสัญญาณ ---
     cv.Optional(CONF_TX_POWER, default=17): cv.int_range(min=2, max=20),
     cv.Optional(CONF_SPREADING_FACTOR, default=7): cv.int_range(min=6, max=12),
     cv.Optional(CONF_CODING_RATE, default=5): cv.int_range(min=5, max=8),
@@ -33,7 +37,8 @@ async def to_code(config):
     
     cg.add(var.set_pins(config[CONF_CS_PIN], config[CONF_DIO0_PIN], config[CONF_RST_PIN]))
     cg.add(var.set_frequency(config[CONF_FREQUENCY]))
-    # ส่งค่าใหม่ไปที่ C++
+    
+    # 🚀 ส่งค่าพารามิเตอร์ใหม่ไปยังไฟล์ .h
     cg.add(var.set_tx_power(config[CONF_TX_POWER]))
     cg.add(var.set_spreading_factor(config[CONF_SPREADING_FACTOR]))
     cg.add(var.set_coding_rate(config[CONF_CODING_RATE]))
