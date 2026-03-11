@@ -49,6 +49,12 @@ class LoRaComponent : public text_sensor::TextSensor, public Component {
     if (packetSize) {
       std::string data = "";
       while (LoRa.available()) { data += (char)LoRa.read(); }
+      // 1. แสดงผลใน Log (อาจารย์จะเห็นในหน้า ESPHome Logs ทันที)
+      int rssi = LoRa.packetRssi();
+      float snr = LoRa.packetSnr(); // แถมค่า SNR (คุณภาพสัญญาณ) ให้ด้วยครับ
+      ESP_LOGI("lora", "Received: %s", data.c_str());
+      ESP_LOGI("lora", "  -> RSSI: %d dBm", rssi);
+      ESP_LOGI("lora", "  -> SNR: %.2f dB", snr);     
       this->publish_state(data);
     }
   }
