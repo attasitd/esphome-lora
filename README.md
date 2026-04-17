@@ -71,3 +71,11 @@ lora_simple:
   tx_power: 17            # 2 to 20 dBm (Default: 17)
   spreading_factor: 7     # 6 to 12 (Default: 7)
   coding_rate: 5          # 5 to 8 for 4/5-4/8 (Default: 5)
+```
+📝 Change Log (อัปเดตล่าสุด)
+
+เพิ่มฟังก์ชัน set_sync_word() และ set_bandwidth() เพื่อรองรับการรับข้อมูลจากบอร์ด Arduino ที่ใช้ค่าเจาะจง
+
+เพิ่มฟังก์ชัน get_rssi() และ get_snr() สำหรับการทำ Dashboard บนหน้าจอ OLED
+
+ปรับปรุงไฟล์ __init__.py ให้รองรับการตรวจสอบค่าผ่าน YAML Validator ของ ESPHome
