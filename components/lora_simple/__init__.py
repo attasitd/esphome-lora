@@ -2,7 +2,12 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import text_sensor
 from esphome.const import CONF_ID, CONF_FREQUENCY
-
+# --- 1. เพิ่มบรรทัดพวกนี้เข้าไปเพื่อแก้ NameError ---
+CONF_SYNC_WORD = "sync_word"
+CONF_BANDWIDTH = "bandwidth"
+CONF_SPREADING_FACTOR = "spreading_factor"
+CONF_CODING_RATE = "coding_rate"
+# ----------------------------------------------
 # 🌟 จุดสำคัญ: ย้าย text_sensor มาไว้ใน DEPENDENCIES เพื่อบังคับให้ compiler หาไฟล์ .h เจอแน่นอน
 DEPENDENCIES = ['spi', 'text_sensor']
 AUTO_LOAD = ['text_sensor']
