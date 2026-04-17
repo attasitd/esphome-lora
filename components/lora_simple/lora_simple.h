@@ -10,7 +10,7 @@ namespace lora_simple {
 
 class LoRaComponent : public text_sensor::TextSensor, public Component {
  public:
-  // ฟังก์ชัน Setter สำหรับรับค่าจาก Python
+  // ฟังก์ชัน Setter สำหรับรับค่าจาก Python (__init__.py)
   void set_pins(int cs, int dio0, int rst) { cs_ = cs; dio0_ = dio0; rst_ = rst; }
   void set_frequency(float freq) { freq_ = freq; }
   void set_tx_power(int power) { tx_power_ = power; }
@@ -25,22 +25,21 @@ class LoRaComponent : public text_sensor::TextSensor, public Component {
 
     if (!LoRa.begin(freq_ * 1E6)) {
       ESP_LOGE("lora", "LoRa Init Failed!");
-      mark_failed();
+      this->mark_failed();
       return;
     }
 
-    // สั่งงานชิปตามค่าที่ตั้งมา
+    // สั่งงานชิปตามค่าที่ส่งมาจาก YAML
     LoRa.setTxPower(tx_power_);
     LoRa.setSpreadingFactor(sf_);
     LoRa.setCodingRate4(cr_);
-// บรรทัดที่ทำให้รับส่งได้ตรงกัน
-    LoRa.setSyncWord(sw_);
-    LoRa.setSignalBandwidth(bw_);    
+    LoRa.setSyncWord(sw_);           // ใช้ค่า 0x34 ที่ส่งมา
+    LoRa.setSignalBandwidth(bw_);    // ใช้ค่า 125000 ที่ส่งมา
+    
     LoRa.receive(); 
-    ESP_LOGI("lora", "LoRa Configured Successfully!");
+    ESP_LOGI("lora", "LoRa Configured Successfully! Sync: 0x%02X, BW: %ld", sw_, bw_);
   }
 
-  // ... (ส่วน loop และ send_data เหมือนเดิม) ...
   void send_data(std::string message) {
     LoRa.beginPacket();
     LoRa.print(message.c_str());
@@ -53,20 +52,24 @@ class LoRaComponent : public text_sensor::TextSensor, public Component {
     if (packetSize) {
       std::string data = "";
       while (LoRa.available()) { data += (char)LoRa.read(); }
-      // 1. แสดงผลใน Log (อาจารย์จะเห็นในหน้า ESPHome Logs ทันที)
+      
       int rssi = LoRa.packetRssi();
-      float snr = LoRa.packetSnr(); // แถมค่า SNR (คุณภาพสัญญาณ) ให้ด้วยครับ
+      float snr = LoRa.packetSnr();
+      
       ESP_LOGI("lora", "Received: %s", data.c_str());
       ESP_LOGI("lora", "  -> RSSI: %d dBm", rssi);
       ESP_LOGI("lora", "  -> SNR: %.2f dB", snr);     
+      
       this->publish_state(data);
     }
   }
 
  protected:
+  // --- ประกาศตัวแปรเก็บค่าพารามิเตอร์ ---
   int cs_, dio0_, rst_;
   float freq_;
-  int tx_power_, sf_, cr_;
+  int tx_power_, sf_, cr_, sw_; // เพิ่ม sw_ ตรงนี้
+  long bw_;                     // เพิ่ม bw_ ตรงนี้
 };
 
 }  // namespace lora_simple
