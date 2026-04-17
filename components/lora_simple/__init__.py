@@ -23,6 +23,7 @@ CONFIG_SCHEMA = text_sensor.text_sensor_schema(LoRaComponent).extend({
     cv.Required(CONF_DIO0_PIN): cv.int_,
     cv.Required(CONF_RST_PIN): cv.int_,
     cv.Optional(CONF_FREQUENCY, default=433.0): cv.float_,
+    cv.Optional("sync_word", default=0x12): cv.hex_int, # <--- เพิ่มบรรทัดนี้
     # --- ส่วนที่เพิ่มใหม่สำหรับจูนสัญญาณ ---
     cv.Optional(CONF_TX_POWER, default=17): cv.int_range(min=2, max=20),
     cv.Optional(CONF_SPREADING_FACTOR, default=7): cv.int_range(min=6, max=12),
@@ -42,3 +43,4 @@ async def to_code(config):
     cg.add(var.set_tx_power(config[CONF_TX_POWER]))
     cg.add(var.set_spreading_factor(config[CONF_SPREADING_FACTOR]))
     cg.add(var.set_coding_rate(config[CONF_CODING_RATE]))
+    cg.add(var.set_sync_word(config["sync_word"])) # <--- เพิ่มบรรทัดนี้
