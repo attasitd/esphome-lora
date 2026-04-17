@@ -16,7 +16,7 @@ class LoRaComponent : public text_sensor::TextSensor, public Component {
   void set_tx_power(int power) { tx_power_ = power; }
   void set_spreading_factor(int sf) { sf_ = sf; }
   void set_coding_rate(int cr) { cr_ = cr; }
-  void set_sync_word(int sw) { sw_ = sw; }  
+  void set_sync_word(int sw) { sw_ = sw; }
   void set_bandwidth(long bw) { bw_ = bw; }
 
   void setup() override {
@@ -33,7 +33,9 @@ class LoRaComponent : public text_sensor::TextSensor, public Component {
     LoRa.setTxPower(tx_power_);
     LoRa.setSpreadingFactor(sf_);
     LoRa.setCodingRate4(cr_);
-    
+// บรรทัดที่ทำให้รับส่งได้ตรงกัน
+    LoRa.setSyncWord(sw_);
+    LoRa.setSignalBandwidth(bw_);    
     LoRa.receive(); 
     ESP_LOGI("lora", "LoRa Configured Successfully!");
   }
