@@ -24,6 +24,9 @@ class LoRaComponent : public text_sensor::TextSensor, public Component {
 
   void setup() override {
     ESP_LOGD("lora", "Starting LoRa with SF%d, CR4/%d, Power %ddBm", sf_, cr_, tx_power_);
+   // บังคับเปิด SPI ขามาตรฐานของ Heltec V2
+    SPI.begin(5, 19, 27, cs_);
+   
     LoRa.setPins(cs_, rst_, dio0_);
 
     if (!LoRa.begin(freq_ * 1E6)) {
